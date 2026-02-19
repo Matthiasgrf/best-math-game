@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Best Math Game</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>🌟 Best Math Game</h1>
+        <p>Practice multiplication from 1×1 to 10×10.</p>
+      </header>
+
+      <section class="stats">
+        <div>Question: <span id="question-count">1</span>/10</div>
+        <div>Score: <span id="score">0</span></div>
+        <div>Streak: <span id="streak">0</span> 🔥</div>
+      </section>
+
+      <section class="question-card">
+        <h2 id="question">2 × 3 = ?</h2>
+        <div class="answer-row">
+          <input id="answer" type="number" inputmode="numeric" min="0" max="100" />
+          <button id="submit">Submit</button>
+        </div>
+        <p id="feedback" aria-live="polite"></p>
+      </section>
+
+      <section class="actions">
+        <button id="next" disabled>Next</button>
+        <button id="new-game">New Game</button>
+      </section>
+
+      <section class="history">
+        <h3>📈 Progress</h3>
+        <p id="best">Best Accuracy: 0%</p>
+        <ul id="history-list"></ul>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
