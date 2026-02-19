@@ -7,6 +7,10 @@ const MESSAGES = {
     title: "🌟 Best Math Game",
     subtitle: "Practice multiplication from 1×1 to 10×10.",
     languageLabel: "Language",
+    languagePickerAria: "Choose language",
+    languageOptionEn: "English",
+    languageOptionDe: "German",
+    languageOptionFr: "French",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Streak",
@@ -28,6 +32,10 @@ const MESSAGES = {
     title: "🌟 Bestes Mathe-Spiel",
     subtitle: "Übe das Einmaleins von 1×1 bis 10×10.",
     languageLabel: "Sprache",
+    languagePickerAria: "Sprache wählen",
+    languageOptionEn: "Englisch",
+    languageOptionDe: "Deutsch",
+    languageOptionFr: "Französisch",
     questionLabel: "Frage",
     scoreLabel: "Punkte",
     streakLabel: "Serie",
@@ -49,6 +57,10 @@ const MESSAGES = {
     title: "🌟 Super Jeu de Maths",
     subtitle: "Entraîne la multiplication de 1×1 à 10×10.",
     languageLabel: "Langue",
+    languagePickerAria: "Choisir la langue",
+    languageOptionEn: "Anglais",
+    languageOptionDe: "Allemand",
+    languageOptionFr: "Français",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Série",
@@ -68,6 +80,11 @@ const MESSAGES = {
   }
 };
 
+const LOCALES = {
+  en: "en-US",
+  de: "de-DE",
+  fr: "fr-FR"
+};
 
 const CORRECT_EMOJIS = ["🤩", "🥳", "🎉", "🦄", "😺", "🚀"];
 
@@ -91,6 +108,9 @@ const ui = {
   subtitle: document.getElementById("subtitle"),
   languageLabel: document.getElementById("language-label"),
   languageSelect: document.getElementById("language-select"),
+  languageOptionEn: document.getElementById("lang-option-en"),
+  languageOptionDe: document.getElementById("lang-option-de"),
+  languageOptionFr: document.getElementById("lang-option-fr"),
   questionLabel: document.getElementById("question-label"),
   scoreLabel: document.getElementById("score-label"),
   streakLabel: document.getElementById("streak-label"),
@@ -112,10 +132,19 @@ function t(key) {
   return MESSAGES[state.language]?.[key] || MESSAGES.en[key] || key;
 }
 
+function currentLocale() {
+  return LOCALES[state.language] || LOCALES.en;
+}
+
 function applyTranslations() {
+  document.documentElement.lang = state.language;
   ui.title.textContent = t("title");
   ui.subtitle.textContent = t("subtitle");
   ui.languageLabel.textContent = t("languageLabel");
+  ui.languageSelect.setAttribute("aria-label", t("languagePickerAria"));
+  ui.languageOptionEn.textContent = t("languageOptionEn");
+  ui.languageOptionDe.textContent = t("languageOptionDe");
+  ui.languageOptionFr.textContent = t("languageOptionFr");
   ui.questionLabel.textContent = t("questionLabel");
   ui.scoreLabel.textContent = t("scoreLabel");
   ui.streakLabel.textContent = t("streakLabel");
@@ -155,7 +184,7 @@ function endRound() {
   const accuracy = Math.round((state.score / TOTAL_QUESTIONS) * 100);
   const history = loadHistory();
   history.unshift({
-    date: new Date().toLocaleString(),
+    date: new Date().toLocaleString(currentLocale()),
     score: state.score,
     total: TOTAL_QUESTIONS,
     accuracy,
