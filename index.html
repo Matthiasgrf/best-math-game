@@ -9,14 +9,24 @@
   <body>
     <main class="app">
       <header>
-        <h1>🌟 Best Math Game</h1>
-        <p>Practice multiplication from 1×1 to 10×10.</p>
+        <div class="header-row">
+          <h1 id="title">🌟 Best Math Game</h1>
+          <label class="lang-picker" for="language-select">
+            <span id="language-label">Language</span>
+            <select id="language-select" aria-label="Choose language">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="fr">Français</option>
+            </select>
+          </label>
+        </div>
+        <p id="subtitle">Practice multiplication from 1×1 to 10×10.</p>
       </header>
 
       <section class="stats">
-        <div>Question: <span id="question-count">1</span>/10</div>
-        <div>Score: <span id="score">0</span></div>
-        <div>Streak: <span id="streak">0</span> 🔥</div>
+        <div><span id="question-label">Question</span>: <span id="question-count">1</span>/10</div>
+        <div><span id="score-label">Score</span>: <span id="score">0</span></div>
+        <div><span id="streak-label">Streak</span>: <span id="streak">0</span> 🔥</div>
       </section>
 
       <section class="question-card">
@@ -34,7 +44,7 @@
       </section>
 
       <section class="history">
-        <h3>📈 Progress</h3>
+        <h3 id="progress-title">📈 Progress</h3>
         <p id="best">Best Accuracy: 0%</p>
         <ul id="history-list"></ul>
       </section>

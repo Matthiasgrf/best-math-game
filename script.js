@@ -1,5 +1,79 @@
 const TOTAL_QUESTIONS = 10;
 const HISTORY_KEY = "best-math-game-history";
+const LANGUAGE_KEY = "best-math-game-language";
+
+const MESSAGES = {
+  en: {
+    title: "🌟 Best Math Game",
+    subtitle: "Practice multiplication from 1×1 to 10×10.",
+    languageLabel: "Language",
+    questionLabel: "Question",
+    scoreLabel: "Score",
+    streakLabel: "Streak",
+    submit: "Submit",
+    next: "Next",
+    newGame: "New Game",
+    progressTitle: "📈 Progress",
+    bestAccuracy: "Best Accuracy",
+    roundComplete: "Round complete!",
+    greatPractice: "⭐ Great practice!",
+    perfectReward: "🏆 Perfect! You unlocked a Super Star reward!",
+    goldReward: "🎉 Awesome! You earned a Gold Badge!",
+    correct: "Great job! +1 point",
+    streakBonus: "🔥 Streak bonus!",
+    niceTry: "Nice try!",
+    practice: "Practice"
+  },
+  de: {
+    title: "🌟 Bestes Mathe-Spiel",
+    subtitle: "Übe das Einmaleins von 1×1 bis 10×10.",
+    languageLabel: "Sprache",
+    questionLabel: "Frage",
+    scoreLabel: "Punkte",
+    streakLabel: "Serie",
+    submit: "Antworten",
+    next: "Weiter",
+    newGame: "Neues Spiel",
+    progressTitle: "📈 Fortschritt",
+    bestAccuracy: "Beste Genauigkeit",
+    roundComplete: "Runde beendet!",
+    greatPractice: "⭐ Tolle Übung!",
+    perfectReward: "🏆 Perfekt! Du hast eine Super-Stern-Belohnung erhalten!",
+    goldReward: "🎉 Super! Du hast ein Gold-Abzeichen bekommen!",
+    correct: "Super! +1 Punkt",
+    streakBonus: "🔥 Serienbonus!",
+    niceTry: "Guter Versuch!",
+    practice: "Üben"
+  },
+  fr: {
+    title: "🌟 Super Jeu de Maths",
+    subtitle: "Entraîne la multiplication de 1×1 à 10×10.",
+    languageLabel: "Langue",
+    questionLabel: "Question",
+    scoreLabel: "Score",
+    streakLabel: "Série",
+    submit: "Valider",
+    next: "Suivant",
+    newGame: "Nouveau jeu",
+    progressTitle: "📈 Progrès",
+    bestAccuracy: "Meilleure précision",
+    roundComplete: "Manche terminée !",
+    greatPractice: "⭐ Super entraînement !",
+    perfectReward: "🏆 Parfait ! Tu as débloqué une récompense Super Étoile !",
+    goldReward: "🎉 Génial ! Tu as gagné un badge Or !",
+    correct: "Bravo ! +1 point",
+    streakBonus: "🔥 Bonus de série !",
+    niceTry: "Bien essayé !",
+    practice: "À travailler"
+  }
+};
+
+
+const CORRECT_EMOJIS = ["🤩", "🥳", "🎉", "🦄", "😺", "🚀"];
+
+function randomCorrectEmoji() {
+  return CORRECT_EMOJIS[Math.floor(Math.random() * CORRECT_EMOJIS.length)];
+}
 
 const state = {
   currentQuestion: 1,
@@ -8,10 +82,18 @@ const state = {
   locked: false,
   a: 1,
   b: 1,
-  misses: []
+  misses: [],
+  language: localStorage.getItem(LANGUAGE_KEY) || "en"
 };
 
 const ui = {
+  title: document.getElementById("title"),
+  subtitle: document.getElementById("subtitle"),
+  languageLabel: document.getElementById("language-label"),
+  languageSelect: document.getElementById("language-select"),
+  questionLabel: document.getElementById("question-label"),
+  scoreLabel: document.getElementById("score-label"),
+  streakLabel: document.getElementById("streak-label"),
   questionCount: document.getElementById("question-count"),
   score: document.getElementById("score"),
   streak: document.getElementById("streak"),
@@ -21,9 +103,28 @@ const ui = {
   next: document.getElementById("next"),
   newGame: document.getElementById("new-game"),
   feedback: document.getElementById("feedback"),
+  progressTitle: document.getElementById("progress-title"),
   best: document.getElementById("best"),
   historyList: document.getElementById("history-list")
 };
+
+function t(key) {
+  return MESSAGES[state.language]?.[key] || MESSAGES.en[key] || key;
+}
+
+function applyTranslations() {
+  ui.title.textContent = t("title");
+  ui.subtitle.textContent = t("subtitle");
+  ui.languageLabel.textContent = t("languageLabel");
+  ui.questionLabel.textContent = t("questionLabel");
+  ui.scoreLabel.textContent = t("scoreLabel");
+  ui.streakLabel.textContent = t("streakLabel");
+  ui.submit.textContent = t("submit");
+  ui.next.textContent = t("next");
+  ui.newGame.textContent = t("newGame");
+  ui.progressTitle.textContent = t("progressTitle");
+  renderHistory();
+}
 
 function randFactor() {
   return Math.floor(Math.random() * 10) + 1;
@@ -62,11 +163,11 @@ function endRound() {
   });
   saveHistory(history.slice(0, 10));
 
-  let reward = "⭐ Great practice!";
-  if (accuracy === 100) reward = "🏆 Perfect! You unlocked a Super Star reward!";
-  else if (accuracy >= 80) reward = "🎉 Awesome! You earned a Gold Badge!";
+  let reward = t("greatPractice");
+  if (accuracy === 100) reward = t("perfectReward");
+  else if (accuracy >= 80) reward = t("goldReward");
 
-  ui.feedback.textContent = `Round complete! ${reward}`;
+  ui.feedback.textContent = `${t("roundComplete")} ${reward}`;
   ui.feedback.className = "ok";
   renderHistory();
 }
@@ -79,12 +180,13 @@ function checkAnswer() {
   if (value === expected) {
     state.score += 1;
     state.streak += 1;
-    ui.feedback.textContent = `Correct! +1 point ${state.streak >= 3 ? "🔥 Streak bonus!" : ""}`;
+    const bonusText = state.streak >= 3 ? ` ${t("streakBonus")}` : "";
+    ui.feedback.textContent = `${randomCorrectEmoji()} ${t("correct")}${bonusText}`;
     ui.feedback.className = "ok";
   } else {
     state.streak = 0;
     state.misses.push(`${state.a}×${state.b}`);
-    ui.feedback.textContent = `Nice try! ${state.a} × ${state.b} = ${expected}`;
+    ui.feedback.textContent = `${t("niceTry")} ${state.a} × ${state.b} = ${expected}`;
     ui.feedback.className = "bad";
   }
 
@@ -121,13 +223,13 @@ function saveHistory(history) {
 function renderHistory() {
   const history = loadHistory();
   const best = history.reduce((max, row) => Math.max(max, row.accuracy), 0);
-  ui.best.textContent = `Best Accuracy: ${best}%`;
+  ui.best.textContent = `${t("bestAccuracy")}: ${best}%`;
   ui.historyList.innerHTML = "";
 
   history.slice(0, 5).forEach((row) => {
     const li = document.createElement("li");
     li.textContent = `${row.date}: ${row.score}/${row.total} (${row.accuracy}%)${
-      row.misses?.length ? ` | Practice: ${row.misses.join(", ")}` : ""
+      row.misses?.length ? ` | ${t("practice")}: ${row.misses.join(", ")}` : ""
     }`;
     ui.historyList.appendChild(li);
   });
@@ -145,11 +247,21 @@ function resetGame() {
 ui.submit.addEventListener("click", checkAnswer);
 ui.next.addEventListener("click", nextStep);
 ui.newGame.addEventListener("click", resetGame);
+ui.languageSelect.addEventListener("change", (event) => {
+  state.language = event.target.value;
+  localStorage.setItem(LANGUAGE_KEY, state.language);
+  applyTranslations();
+});
 ui.answer.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !ui.submit.disabled) {
     checkAnswer();
   }
 });
 
+if (!MESSAGES[state.language]) {
+  state.language = "en";
+}
+ui.languageSelect.value = state.language;
+applyTranslations();
 renderHistory();
 resetGame();
