@@ -100,7 +100,7 @@ const state = {
   a: 1,
   b: 1,
   misses: [],
-  language: localStorage.getItem(LANGUAGE_KEY) || "en"
+  language: localStorage.getItem(LANGUAGE_KEY) || "de"
 };
 
 const ui = {
@@ -288,7 +288,7 @@ ui.answer.addEventListener("keydown", (event) => {
 });
 
 if (!MESSAGES[state.language]) {
-  state.language = "en";
+  state.language = "de";
 }
 ui.languageSelect.value = state.language;
 applyTranslations();
