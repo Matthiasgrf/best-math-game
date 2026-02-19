@@ -24,6 +24,7 @@ const MESSAGES = {
     newGame: "New Game",
     progressTitle: "📈 Progress",
     bestAccuracy: "Best Accuracy",
+    durationLabel: "Duration",
     roundComplete: "Round complete!",
     greatPractice: "⭐ Great practice!",
     perfectReward: "🏆 Perfect! You unlocked a Super Star reward!",
@@ -53,6 +54,7 @@ const MESSAGES = {
     newGame: "Neues Spiel",
     progressTitle: "📈 Fortschritt",
     bestAccuracy: "Beste Genauigkeit",
+    durationLabel: "Dauer",
     roundComplete: "Runde beendet!",
     greatPractice: "⭐ Tolle Übung!",
     perfectReward: "🏆 Perfekt! Du hast eine Super-Stern-Belohnung erhalten!",
@@ -82,6 +84,7 @@ const MESSAGES = {
     newGame: "Nouveau jeu",
     progressTitle: "📈 Progrès",
     bestAccuracy: "Meilleure précision",
+    durationLabel: "Durée",
     roundComplete: "Manche terminée !",
     greatPractice: "⭐ Super entraînement !",
     perfectReward: "🏆 Parfait ! Tu as débloqué une récompense Super Étoile !",
@@ -105,7 +108,8 @@ const state = {
   b: 1,
   misses: [],
   language: localStorage.getItem(LANGUAGE_KEY) || "de",
-  mode: localStorage.getItem(MODE_KEY) || "choice"
+  mode: localStorage.getItem(MODE_KEY) || "choice",
+  roundStartedAt: Date.now()
 };
 
 const ui = {
@@ -153,6 +157,18 @@ function randFactor() {
 
 function randomCorrectEmoji() {
   return CORRECT_EMOJIS[Math.floor(Math.random() * CORRECT_EMOJIS.length)];
+}
+
+function formatDuration(totalSeconds) {
+  const safeSeconds = Math.max(0, Number(totalSeconds) || 0);
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const seconds = safeSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 function applyTranslations() {
@@ -258,13 +274,15 @@ function endRound() {
   ui.submit.disabled = true;
   ui.next.disabled = true;
   const accuracy = Math.round((state.score / TOTAL_QUESTIONS) * 100);
+  const durationSeconds = Math.round((Date.now() - state.roundStartedAt) / 1000);
   const history = loadHistory();
   history.unshift({
     date: new Date().toLocaleString(currentLocale()),
     score: state.score,
     total: TOTAL_QUESTIONS,
     accuracy,
-    misses: state.misses
+    misses: state.misses,
+    durationSeconds
   });
   saveHistory(history.slice(0, 10));
 
@@ -340,7 +358,10 @@ function renderHistory() {
 
   history.slice(0, 5).forEach((row) => {
     const li = document.createElement("li");
-    li.textContent = `${row.date}: ${row.score}/${row.total} (${row.accuracy}%)${
+    const durationPart = Number.isFinite(row.durationSeconds)
+      ? ` | ${t("durationLabel")}: ${formatDuration(row.durationSeconds)}`
+      : "";
+    li.textContent = `${row.date}: ${row.score}/${row.total} (${row.accuracy}%)${durationPart}${
       row.misses?.length ? ` | ${t("practice")}: ${row.misses.join(", ")}` : ""
     }`;
     ui.historyList.appendChild(li);
@@ -352,6 +373,7 @@ function resetGame() {
   state.score = 0;
   state.streak = 0;
   state.misses = [];
+  state.roundStartedAt = Date.now();
   renderStats();
   newQuestion();
 }
