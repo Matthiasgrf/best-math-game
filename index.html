@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Best Math Game</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <div class="header-row">
+          <h1 id="title">🌟 Best Math Game</h1>
+          <label class="lang-picker" for="language-select">
+            <span id="language-label">Language</span>
+            <select id="language-select" aria-label="Choose language">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="fr">Français</option>
+            </select>
+          </label>
+        </div>
+        <p id="subtitle">Practice multiplication from 1×1 to 10×10.</p>
+      </header>
+
+      <section class="stats">
+        <div><span id="question-label">Question</span>: <span id="question-count">1</span>/10</div>
+        <div><span id="score-label">Score</span>: <span id="score">0</span></div>
+        <div><span id="streak-label">Streak</span>: <span id="streak">0</span> 🔥</div>
+      </section>
+
+      <section class="question-card">
+        <h2 id="question">2 × 3 = ?</h2>
+        <div class="answer-row">
+          <input id="answer" type="number" inputmode="numeric" min="0" max="100" />
+          <button id="submit">Submit</button>
+        </div>
+        <p id="feedback" aria-live="polite"></p>
+      </section>
+
+      <section class="actions">
+        <button id="next" disabled>Next</button>
+        <button id="new-game">New Game</button>
+      </section>
+
+      <section class="history">
+        <h3 id="progress-title">📈 Progress</h3>
+        <p id="best">Best Accuracy: 0%</p>
+        <ul id="history-list"></ul>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
