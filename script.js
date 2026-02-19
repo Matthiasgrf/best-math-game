@@ -105,7 +105,7 @@ const state = {
   b: 1,
   misses: [],
   language: localStorage.getItem(LANGUAGE_KEY) || "de",
-  mode: localStorage.getItem(MODE_KEY) || "input"
+  mode: localStorage.getItem(MODE_KEY) || "choice"
 };
 
 const ui = {
@@ -377,7 +377,7 @@ ui.answer.addEventListener("keydown", (event) => {
 });
 
 if (!MESSAGES[state.language]) state.language = "de";
-if (!["input", "choice"].includes(state.mode)) state.mode = "input";
+if (!["input", "choice"].includes(state.mode)) state.mode = "choice";
 ui.languageSelect.value = state.language;
 ui.modeSelect.value = state.mode;
 applyTranslations();
