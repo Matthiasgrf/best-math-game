@@ -9,7 +9,6 @@ A kid-friendly multiplication practice game for grades 2+ with rewards, streaks,
 - Score + streak tracking
 - End-of-round rewards based on accuracy
 - Local progress history with missed facts to review
-- Language selector with English, German, and French
 
 ## Run locally
 
