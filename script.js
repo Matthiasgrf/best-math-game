@@ -1,6 +1,7 @@
 const TOTAL_QUESTIONS = 10;
 const HISTORY_KEY = "best-math-game-history";
 const LANGUAGE_KEY = "best-math-game-language";
+const MODE_KEY = "best-math-game-mode";
 
 const MESSAGES = {
   en: {
@@ -11,6 +12,10 @@ const MESSAGES = {
     languageOptionEn: "English",
     languageOptionDe: "German",
     languageOptionFr: "French",
+    modeLabel: "Game Mode",
+    modePickerAria: "Choose game mode",
+    modeInput: "Type Answer",
+    modeChoice: "4 Choices",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Streak",
@@ -36,6 +41,10 @@ const MESSAGES = {
     languageOptionEn: "Englisch",
     languageOptionDe: "Deutsch",
     languageOptionFr: "Französisch",
+    modeLabel: "Spielmodus",
+    modePickerAria: "Spielmodus wählen",
+    modeInput: "Antwort tippen",
+    modeChoice: "4 Auswahlantworten",
     questionLabel: "Frage",
     scoreLabel: "Punkte",
     streakLabel: "Serie",
@@ -61,6 +70,10 @@ const MESSAGES = {
     languageOptionEn: "Anglais",
     languageOptionDe: "Allemand",
     languageOptionFr: "Français",
+    modeLabel: "Mode de jeu",
+    modePickerAria: "Choisir le mode de jeu",
+    modeInput: "Écrire la réponse",
+    modeChoice: "4 choix",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Série",
@@ -80,17 +93,8 @@ const MESSAGES = {
   }
 };
 
-const LOCALES = {
-  en: "en-US",
-  de: "de-DE",
-  fr: "fr-FR"
-};
-
+const LOCALES = { en: "en-US", de: "de-DE", fr: "fr-FR" };
 const CORRECT_EMOJIS = ["🤩", "🥳", "🎉", "🦄", "😺", "🚀"];
-
-function randomCorrectEmoji() {
-  return CORRECT_EMOJIS[Math.floor(Math.random() * CORRECT_EMOJIS.length)];
-}
 
 const state = {
   currentQuestion: 1,
@@ -100,7 +104,8 @@ const state = {
   a: 1,
   b: 1,
   misses: [],
-  language: localStorage.getItem(LANGUAGE_KEY) || "de"
+  language: localStorage.getItem(LANGUAGE_KEY) || "de",
+  mode: localStorage.getItem(MODE_KEY) || "input"
 };
 
 const ui = {
@@ -111,6 +116,10 @@ const ui = {
   languageOptionEn: document.getElementById("lang-option-en"),
   languageOptionDe: document.getElementById("lang-option-de"),
   languageOptionFr: document.getElementById("lang-option-fr"),
+  modeLabel: document.getElementById("mode-label"),
+  modeSelect: document.getElementById("mode-select"),
+  modeOptionInput: document.getElementById("mode-option-input"),
+  modeOptionChoice: document.getElementById("mode-option-choice"),
   questionLabel: document.getElementById("question-label"),
   scoreLabel: document.getElementById("score-label"),
   streakLabel: document.getElementById("streak-label"),
@@ -118,8 +127,10 @@ const ui = {
   score: document.getElementById("score"),
   streak: document.getElementById("streak"),
   question: document.getElementById("question"),
+  answerRow: document.getElementById("answer-row"),
   answer: document.getElementById("answer"),
   submit: document.getElementById("submit"),
+  choiceRow: document.getElementById("choice-row"),
   next: document.getElementById("next"),
   newGame: document.getElementById("new-game"),
   feedback: document.getElementById("feedback"),
@@ -129,11 +140,19 @@ const ui = {
 };
 
 function t(key) {
-  return MESSAGES[state.language]?.[key] || MESSAGES.en[key] || key;
+  return MESSAGES[state.language]?.[key] || MESSAGES.de[key] || key;
 }
 
 function currentLocale() {
-  return LOCALES[state.language] || LOCALES.en;
+  return LOCALES[state.language] || LOCALES.de;
+}
+
+function randFactor() {
+  return Math.floor(Math.random() * 10) + 1;
+}
+
+function randomCorrectEmoji() {
+  return CORRECT_EMOJIS[Math.floor(Math.random() * CORRECT_EMOJIS.length)];
 }
 
 function applyTranslations() {
@@ -145,6 +164,10 @@ function applyTranslations() {
   ui.languageOptionEn.textContent = t("languageOptionEn");
   ui.languageOptionDe.textContent = t("languageOptionDe");
   ui.languageOptionFr.textContent = t("languageOptionFr");
+  ui.modeLabel.textContent = t("modeLabel");
+  ui.modeSelect.setAttribute("aria-label", t("modePickerAria"));
+  ui.modeOptionInput.textContent = t("modeInput");
+  ui.modeOptionChoice.textContent = t("modeChoice");
   ui.questionLabel.textContent = t("questionLabel");
   ui.scoreLabel.textContent = t("scoreLabel");
   ui.streakLabel.textContent = t("streakLabel");
@@ -155,14 +178,61 @@ function applyTranslations() {
   renderHistory();
 }
 
-function randFactor() {
-  return Math.floor(Math.random() * 10) + 1;
+function applyModeUI() {
+  const choiceMode = state.mode === "choice";
+  ui.answerRow.hidden = choiceMode;
+  ui.choiceRow.hidden = !choiceMode;
 }
 
 function renderStats() {
   ui.questionCount.textContent = String(state.currentQuestion);
   ui.score.textContent = String(state.score);
   ui.streak.textContent = String(state.streak);
+}
+
+function generateChoices(correct) {
+  const candidates = new Set();
+  const nearProducts = [
+    Math.max(1, state.a - 1) * state.b,
+    Math.max(1, state.a - 2) * state.b,
+    state.a * Math.max(1, state.b - 1),
+    state.a * Math.max(1, state.b - 2),
+    Math.min(10, state.a + 1) * state.b,
+    state.a * Math.min(10, state.b + 1)
+  ];
+
+  nearProducts.forEach((value) => {
+    if (value !== correct && value > 0 && value <= 100) candidates.add(value);
+  });
+
+  while (candidates.size < 3) {
+    const jitter = Math.floor(Math.random() * 7) + 1;
+    const candidate = Math.max(1, correct + (Math.random() > 0.5 ? jitter : -jitter));
+    if (candidate !== correct && candidate <= 100) candidates.add(candidate);
+  }
+
+  const options = [correct, ...Array.from(candidates).slice(0, 3)];
+  for (let i = options.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+  return options;
+}
+
+function renderChoiceButtons() {
+  const correct = state.a * state.b;
+  const options = generateChoices(correct);
+  ui.choiceRow.innerHTML = "";
+
+  options.forEach((option) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "choice-btn";
+    btn.textContent = String(option);
+    btn.disabled = false;
+    btn.addEventListener("click", () => checkAnswer(option));
+    ui.choiceRow.appendChild(btn);
+  });
 }
 
 function newQuestion() {
@@ -175,7 +245,13 @@ function newQuestion() {
   ui.feedback.className = "";
   ui.submit.disabled = false;
   ui.next.disabled = true;
-  ui.answer.focus();
+
+  applyModeUI();
+  if (state.mode === "choice") {
+    renderChoiceButtons();
+  } else {
+    ui.answer.focus();
+  }
 }
 
 function endRound() {
@@ -201,10 +277,16 @@ function endRound() {
   renderHistory();
 }
 
-function checkAnswer() {
+function lockChoiceButtons() {
+  Array.from(ui.choiceRow.querySelectorAll("button")).forEach((btn) => {
+    btn.disabled = true;
+  });
+}
+
+function checkAnswer(choiceValue) {
   if (state.locked) return;
   const expected = state.a * state.b;
-  const value = Number(ui.answer.value);
+  const value = state.mode === "choice" ? Number(choiceValue) : Number(ui.answer.value);
 
   if (value === expected) {
     state.score += 1;
@@ -222,6 +304,7 @@ function checkAnswer() {
   state.locked = true;
   ui.submit.disabled = true;
   ui.next.disabled = false;
+  lockChoiceButtons();
   renderStats();
 }
 
@@ -273,7 +356,7 @@ function resetGame() {
   newQuestion();
 }
 
-ui.submit.addEventListener("click", checkAnswer);
+ui.submit.addEventListener("click", () => checkAnswer());
 ui.next.addEventListener("click", nextStep);
 ui.newGame.addEventListener("click", resetGame);
 ui.languageSelect.addEventListener("change", (event) => {
@@ -281,16 +364,21 @@ ui.languageSelect.addEventListener("change", (event) => {
   localStorage.setItem(LANGUAGE_KEY, state.language);
   applyTranslations();
 });
+ui.modeSelect.addEventListener("change", (event) => {
+  state.mode = event.target.value;
+  localStorage.setItem(MODE_KEY, state.mode);
+  resetGame();
+  applyTranslations();
+});
 ui.answer.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !ui.submit.disabled) {
+  if (event.key === "Enter" && !ui.submit.disabled && state.mode === "input") {
     checkAnswer();
   }
 });
 
-if (!MESSAGES[state.language]) {
-  state.language = "de";
-}
+if (!MESSAGES[state.language]) state.language = "de";
+if (!["input", "choice"].includes(state.mode)) state.mode = "input";
 ui.languageSelect.value = state.language;
+ui.modeSelect.value = state.mode;
 applyTranslations();
-renderHistory();
 resetGame();

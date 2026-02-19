@@ -11,14 +11,23 @@
       <header>
         <div class="header-row">
           <h1 id="title">🌟 Best Math Game</h1>
-          <label class="lang-picker" for="language-select">
-            <span id="language-label">Language</span>
-            <select id="language-select" aria-label="Choose language">
-              <option id="lang-option-en" value="en">English</option>
-              <option id="lang-option-de" value="de">Deutsch</option>
-              <option id="lang-option-fr" value="fr">Français</option>
-            </select>
-          </label>
+          <div class="pickers">
+            <label class="lang-picker" for="language-select">
+              <span id="language-label">Language</span>
+              <select id="language-select" aria-label="Choose language">
+                <option id="lang-option-en" value="en">English</option>
+                <option id="lang-option-de" value="de">Deutsch</option>
+                <option id="lang-option-fr" value="fr">Français</option>
+              </select>
+            </label>
+            <label class="lang-picker" for="mode-select">
+              <span id="mode-label">Game Mode</span>
+              <select id="mode-select" aria-label="Choose game mode">
+                <option id="mode-option-input" value="input">Type Answer</option>
+                <option id="mode-option-choice" value="choice">4 Choices</option>
+              </select>
+            </label>
+          </div>
         </div>
         <p id="subtitle">Practice multiplication from 1×1 to 10×10.</p>
       </header>
@@ -31,10 +40,11 @@
 
       <section class="question-card">
         <h2 id="question">2 × 3 = ?</h2>
-        <div class="answer-row">
+        <div id="answer-row" class="answer-row">
           <input id="answer" type="number" inputmode="numeric" min="0" max="100" />
           <button id="submit">Submit</button>
         </div>
+        <div id="choice-row" class="choice-row" hidden></div>
         <p id="feedback" aria-live="polite"></p>
       </section>
 

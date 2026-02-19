@@ -24,7 +24,7 @@ body {
 }
 
 .app {
-  width: min(700px, 100%);
+  width: min(760px, 100%);
   background: var(--card);
   border-radius: 20px;
   padding: 1.25rem;
@@ -41,6 +41,12 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pickers {
+  display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
@@ -77,6 +83,19 @@ h3 {
 .answer-row {
   display: flex;
   gap: 0.5rem;
+}
+
+.choice-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  gap: 0.6rem;
+}
+
+.choice-btn {
+  background: #e8f0ff;
+  color: #1f2937;
+  border: 2px solid #c8dafc;
+  font-weight: 700;
 }
 
 input,
