@@ -11,6 +11,7 @@ A kid-friendly multiplication practice game for grades 2+ with rewards, streaks,
 - Local progress history with missed facts to review
 - Language selector with English, German, and French
 - Two game variants: typed answers and 4-choice multiple choice
+- Second game in mode dropdown: addition with numbers 1-100 (sum max 100)
 - Mobile-first native-app-like layout for phones and tablets
 
 ## Run locally

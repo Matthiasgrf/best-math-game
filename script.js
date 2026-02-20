@@ -16,6 +16,7 @@ const MESSAGES = {
     modePickerAria: "Choose game mode",
     modeInput: "Type Answer",
     modeChoice: "4 Choices",
+    modeAddition: "Addition up to 100 (4 Choices)",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Streak",
@@ -46,6 +47,7 @@ const MESSAGES = {
     modePickerAria: "Spielmodus wählen",
     modeInput: "Antwort tippen",
     modeChoice: "4 Auswahlantworten",
+    modeAddition: "Addition bis 100 (4 Auswahlantworten)",
     questionLabel: "Frage",
     scoreLabel: "Punkte",
     streakLabel: "Serie",
@@ -76,6 +78,7 @@ const MESSAGES = {
     modePickerAria: "Choisir le mode de jeu",
     modeInput: "Écrire la réponse",
     modeChoice: "4 choix",
+    modeAddition: "Addition jusqu'à 100 (4 choix)",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Série",
@@ -124,6 +127,7 @@ const ui = {
   modeSelect: document.getElementById("mode-select"),
   modeOptionInput: document.getElementById("mode-option-input"),
   modeOptionChoice: document.getElementById("mode-option-choice"),
+  modeOptionAddition: document.getElementById("mode-option-addition"),
   questionLabel: document.getElementById("question-label"),
   scoreLabel: document.getElementById("score-label"),
   streakLabel: document.getElementById("streak-label"),
@@ -155,6 +159,10 @@ function randFactor() {
   return Math.floor(Math.random() * 10) + 1;
 }
 
+function expectedAnswer() {
+  return state.mode === "addition" ? state.a + state.b : state.a * state.b;
+}
+
 function randomCorrectEmoji() {
   return CORRECT_EMOJIS[Math.floor(Math.random() * CORRECT_EMOJIS.length)];
 }
@@ -184,6 +192,7 @@ function applyTranslations() {
   ui.modeSelect.setAttribute("aria-label", t("modePickerAria"));
   ui.modeOptionInput.textContent = t("modeInput");
   ui.modeOptionChoice.textContent = t("modeChoice");
+  ui.modeOptionAddition.textContent = t("modeAddition");
   ui.questionLabel.textContent = t("questionLabel");
   ui.scoreLabel.textContent = t("scoreLabel");
   ui.streakLabel.textContent = t("streakLabel");
@@ -195,7 +204,7 @@ function applyTranslations() {
 }
 
 function applyModeUI() {
-  const choiceMode = state.mode === "choice";
+  const choiceMode = state.mode !== "input";
   ui.answerRow.hidden = choiceMode;
   ui.choiceRow.hidden = !choiceMode;
 }
@@ -206,7 +215,7 @@ function renderStats() {
   ui.streak.textContent = String(state.streak);
 }
 
-function generateChoices(correct) {
+function generateMultiplicationChoices(correct) {
   const candidates = new Set();
   const nearProducts = [
     Math.max(1, state.a - 1) * state.b,
@@ -235,9 +244,38 @@ function generateChoices(correct) {
   return options;
 }
 
+function generateAdditionChoices(correct) {
+  const candidates = new Set();
+  const nearSums = [
+    Math.max(1, correct - state.a),
+    Math.max(1, correct - state.b),
+    Math.min(100, correct + Math.max(1, Math.floor(state.a / 2))),
+    Math.min(100, correct + Math.max(1, Math.floor(state.b / 2))),
+    Math.max(1, correct - 10),
+    Math.min(100, correct + 10)
+  ];
+
+  nearSums.forEach((value) => {
+    if (value !== correct && value >= 1 && value <= 100) candidates.add(value);
+  });
+
+  while (candidates.size < 3) {
+    const jitter = Math.floor(Math.random() * 8) + 1;
+    const candidate = Math.max(1, Math.min(100, correct + (Math.random() > 0.5 ? jitter : -jitter)));
+    if (candidate !== correct) candidates.add(candidate);
+  }
+
+  const options = [correct, ...Array.from(candidates).slice(0, 3)];
+  for (let i = options.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+  return options;
+}
+
 function renderChoiceButtons() {
-  const correct = state.a * state.b;
-  const options = generateChoices(correct);
+  const correct = expectedAnswer();
+  const options = state.mode === "addition" ? generateAdditionChoices(correct) : generateMultiplicationChoices(correct);
   ui.choiceRow.innerHTML = "";
 
   options.forEach((option) => {
@@ -252,10 +290,15 @@ function renderChoiceButtons() {
 }
 
 function newQuestion() {
-  state.a = randFactor();
-  state.b = randFactor();
+  if (state.mode === "addition") {
+    state.a = Math.floor(Math.random() * 99) + 1;
+    state.b = Math.floor(Math.random() * (100 - state.a)) + 1;
+  } else {
+    state.a = randFactor();
+    state.b = randFactor();
+  }
   state.locked = false;
-  ui.question.textContent = `${state.a} × ${state.b} = ?`;
+  ui.question.textContent = state.mode === "addition" ? `${state.a} + ${state.b} = ?` : `${state.a} × ${state.b} = ?`;
   ui.answer.value = "";
   ui.feedback.textContent = "";
   ui.feedback.className = "";
@@ -263,7 +306,7 @@ function newQuestion() {
   ui.next.disabled = true;
 
   applyModeUI();
-  if (state.mode === "choice") {
+  if (state.mode !== "input") {
     renderChoiceButtons();
   } else {
     ui.answer.focus();
@@ -303,8 +346,8 @@ function lockChoiceButtons() {
 
 function checkAnswer(choiceValue) {
   if (state.locked) return;
-  const expected = state.a * state.b;
-  const value = state.mode === "choice" ? Number(choiceValue) : Number(ui.answer.value);
+  const expected = expectedAnswer();
+  const value = state.mode !== "input" ? Number(choiceValue) : Number(ui.answer.value);
 
   if (value === expected) {
     state.score += 1;
@@ -314,8 +357,10 @@ function checkAnswer(choiceValue) {
     ui.feedback.className = "ok";
   } else {
     state.streak = 0;
-    state.misses.push(`${state.a}×${state.b}`);
-    ui.feedback.textContent = `${t("niceTry")} ${state.a} × ${state.b} = ${expected}`;
+    const questionText = state.mode === "addition" ? `${state.a}+${state.b}` : `${state.a}×${state.b}`;
+    const operator = state.mode === "addition" ? "+" : "×";
+    state.misses.push(questionText);
+    ui.feedback.textContent = `${t("niceTry")} ${state.a} ${operator} ${state.b} = ${expected}`;
     ui.feedback.className = "bad";
   }
 
@@ -399,7 +444,7 @@ ui.answer.addEventListener("keydown", (event) => {
 });
 
 if (!MESSAGES[state.language]) state.language = "de";
-if (!["input", "choice"].includes(state.mode)) state.mode = "choice";
+if (!["input", "choice", "addition"].includes(state.mode)) state.mode = "choice";
 ui.languageSelect.value = state.language;
 ui.modeSelect.value = state.mode;
 applyTranslations();
