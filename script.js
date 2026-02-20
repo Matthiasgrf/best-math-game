@@ -6,17 +6,18 @@ const MODE_KEY = "best-math-game-mode";
 const MESSAGES = {
   en: {
     title: "🌟 Best Math Game",
-    subtitle: "Practice multiplication from 1×1 to 10×10.",
+    subtitle: "Choose language and game mode to start.",
+    gameSubtitleMultiplication: "Practice multiplication from 1×1 to 10×10.",
+    gameSubtitleAddition: "Practice additions from 1 to 100 (sum max 100).",
     languageLabel: "Language",
     languagePickerAria: "Choose language",
     languageOptionEn: "English",
     languageOptionDe: "German",
     languageOptionFr: "French",
     modeLabel: "Game Mode",
-    modePickerAria: "Choose game mode",
-    modeInput: "Type Answer",
-    modeChoice: "4 Choices",
-    modeAddition: "Addition up to 100 (4 Choices)",
+    modeInput: "Type Answer (Multiplication)",
+    modeChoice: "4 Choices (Multiplication)",
+    modeAddition: "4 Choices (Addition up to 100)",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Streak",
@@ -37,17 +38,18 @@ const MESSAGES = {
   },
   de: {
     title: "🌟 Bestes Mathe-Spiel",
-    subtitle: "Übe das Einmaleins von 1×1 bis 10×10.",
+    subtitle: "Sprache und Spielmodus auswählen, dann starten.",
+    gameSubtitleMultiplication: "Übe das Einmaleins von 1×1 bis 10×10.",
+    gameSubtitleAddition: "Übe Plusaufgaben von 1 bis 100 (Summe max. 100).",
     languageLabel: "Sprache",
     languagePickerAria: "Sprache wählen",
     languageOptionEn: "Englisch",
     languageOptionDe: "Deutsch",
     languageOptionFr: "Französisch",
     modeLabel: "Spielmodus",
-    modePickerAria: "Spielmodus wählen",
-    modeInput: "Antwort tippen",
-    modeChoice: "4 Auswahlantworten",
-    modeAddition: "Addition bis 100 (4 Auswahlantworten)",
+    modeInput: "Antwort tippen (Mal)",
+    modeChoice: "4 Auswahlantworten (Mal)",
+    modeAddition: "4 Auswahlantworten (Plus bis 100)",
     questionLabel: "Frage",
     scoreLabel: "Punkte",
     streakLabel: "Serie",
@@ -68,17 +70,18 @@ const MESSAGES = {
   },
   fr: {
     title: "🌟 Super Jeu de Maths",
-    subtitle: "Entraîne la multiplication de 1×1 à 10×10.",
+    subtitle: "Choisis la langue et le mode de jeu pour commencer.",
+    gameSubtitleMultiplication: "Entraîne la multiplication de 1×1 à 10×10.",
+    gameSubtitleAddition: "Entraîne l'addition de 1 à 100 (somme max 100).",
     languageLabel: "Langue",
     languagePickerAria: "Choisir la langue",
     languageOptionEn: "Anglais",
     languageOptionDe: "Allemand",
     languageOptionFr: "Français",
     modeLabel: "Mode de jeu",
-    modePickerAria: "Choisir le mode de jeu",
-    modeInput: "Écrire la réponse",
-    modeChoice: "4 choix",
-    modeAddition: "Addition jusqu'à 100 (4 choix)",
+    modeInput: "Écrire la réponse (Multiplication)",
+    modeChoice: "4 choix (Multiplication)",
+    modeAddition: "4 choix (Addition jusqu'à 100)",
     questionLabel: "Question",
     scoreLabel: "Score",
     streakLabel: "Série",
@@ -116,18 +119,22 @@ const state = {
 };
 
 const ui = {
+  menuPage: document.getElementById("menu-page"),
+  gamePage: document.getElementById("game-page"),
   title: document.getElementById("title"),
   subtitle: document.getElementById("subtitle"),
+  gameTitle: document.getElementById("game-title"),
+  gameSubtitle: document.getElementById("game-subtitle"),
   languageLabel: document.getElementById("language-label"),
   languageSelect: document.getElementById("language-select"),
   languageOptionEn: document.getElementById("lang-option-en"),
   languageOptionDe: document.getElementById("lang-option-de"),
   languageOptionFr: document.getElementById("lang-option-fr"),
   modeLabel: document.getElementById("mode-label"),
-  modeSelect: document.getElementById("mode-select"),
-  modeOptionInput: document.getElementById("mode-option-input"),
-  modeOptionChoice: document.getElementById("mode-option-choice"),
-  modeOptionAddition: document.getElementById("mode-option-addition"),
+  modeInput: document.getElementById("mode-input"),
+  modeChoice: document.getElementById("mode-choice"),
+  modeAddition: document.getElementById("mode-addition"),
+  menuButton: document.getElementById("menu-button"),
   questionLabel: document.getElementById("question-label"),
   scoreLabel: document.getElementById("score-label"),
   streakLabel: document.getElementById("streak-label"),
@@ -155,44 +162,46 @@ function currentLocale() {
   return LOCALES[state.language] || LOCALES.de;
 }
 
-function randFactor() {
-  return Math.floor(Math.random() * 10) + 1;
-}
-
-function expectedAnswer() {
-  return state.mode === "addition" ? state.a + state.b : state.a * state.b;
-}
-
 function randomCorrectEmoji() {
   return CORRECT_EMOJIS[Math.floor(Math.random() * CORRECT_EMOJIS.length)];
 }
 
 function formatDuration(totalSeconds) {
   const safeSeconds = Math.max(0, Number(totalSeconds) || 0);
-  const hours = Math.floor(safeSeconds / 3600);
-  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const minutes = Math.floor(safeSeconds / 60);
   const seconds = safeSeconds % 60;
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  }
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function expectedAnswer() {
+  return state.mode === "addition" ? state.a + state.b : state.a * state.b;
+}
+
+function setGameSubtitle() {
+  ui.gameSubtitle.textContent = state.mode === "addition" ? t("gameSubtitleAddition") : t("gameSubtitleMultiplication");
+}
+
+function updateModeButtons() {
+  ui.modeInput.classList.toggle("active", state.mode === "input");
+  ui.modeChoice.classList.toggle("active", state.mode === "choice");
+  ui.modeAddition.classList.toggle("active", state.mode === "addition");
 }
 
 function applyTranslations() {
   document.documentElement.lang = state.language;
   ui.title.textContent = t("title");
   ui.subtitle.textContent = t("subtitle");
+  ui.gameTitle.textContent = t("title");
+  setGameSubtitle();
   ui.languageLabel.textContent = t("languageLabel");
   ui.languageSelect.setAttribute("aria-label", t("languagePickerAria"));
   ui.languageOptionEn.textContent = t("languageOptionEn");
   ui.languageOptionDe.textContent = t("languageOptionDe");
   ui.languageOptionFr.textContent = t("languageOptionFr");
   ui.modeLabel.textContent = t("modeLabel");
-  ui.modeSelect.setAttribute("aria-label", t("modePickerAria"));
-  ui.modeOptionInput.textContent = t("modeInput");
-  ui.modeOptionChoice.textContent = t("modeChoice");
-  ui.modeOptionAddition.textContent = t("modeAddition");
+  ui.modeInput.textContent = t("modeInput");
+  ui.modeChoice.textContent = t("modeChoice");
+  ui.modeAddition.textContent = t("modeAddition");
   ui.questionLabel.textContent = t("questionLabel");
   ui.scoreLabel.textContent = t("scoreLabel");
   ui.streakLabel.textContent = t("streakLabel");
@@ -207,6 +216,12 @@ function applyModeUI() {
   const choiceMode = state.mode !== "input";
   ui.answerRow.hidden = choiceMode;
   ui.choiceRow.hidden = !choiceMode;
+  setGameSubtitle();
+  updateModeButtons();
+}
+
+function randFactor() {
+  return Math.floor(Math.random() * 10) + 1;
 }
 
 function renderStats() {
@@ -216,56 +231,47 @@ function renderStats() {
 }
 
 function generateMultiplicationChoices(correct) {
-  const candidates = new Set();
-  const nearProducts = [
+  const candidates = new Set([
     Math.max(1, state.a - 1) * state.b,
     Math.max(1, state.a - 2) * state.b,
     state.a * Math.max(1, state.b - 1),
     state.a * Math.max(1, state.b - 2),
     Math.min(10, state.a + 1) * state.b,
     state.a * Math.min(10, state.b + 1)
-  ];
+  ]);
 
-  nearProducts.forEach((value) => {
-    if (value !== correct && value > 0 && value <= 100) candidates.add(value);
-  });
-
+  candidates.delete(correct);
   while (candidates.size < 3) {
     const jitter = Math.floor(Math.random() * 7) + 1;
-    const candidate = Math.max(1, correct + (Math.random() > 0.5 ? jitter : -jitter));
-    if (candidate !== correct && candidate <= 100) candidates.add(candidate);
+    candidates.add(Math.max(1, Math.min(100, correct + (Math.random() > 0.5 ? jitter : -jitter))));
+    candidates.delete(correct);
   }
 
-  const options = [correct, ...Array.from(candidates).slice(0, 3)];
-  for (let i = options.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [options[i], options[j]] = [options[j], options[i]];
-  }
-  return options;
+  return shuffle([correct, ...Array.from(candidates).slice(0, 3)]);
 }
 
 function generateAdditionChoices(correct) {
-  const candidates = new Set();
-  const nearSums = [
+  const candidates = new Set([
     Math.max(1, correct - state.a),
     Math.max(1, correct - state.b),
     Math.min(100, correct + Math.max(1, Math.floor(state.a / 2))),
     Math.min(100, correct + Math.max(1, Math.floor(state.b / 2))),
     Math.max(1, correct - 10),
     Math.min(100, correct + 10)
-  ];
+  ]);
 
-  nearSums.forEach((value) => {
-    if (value !== correct && value >= 1 && value <= 100) candidates.add(value);
-  });
-
+  candidates.delete(correct);
   while (candidates.size < 3) {
     const jitter = Math.floor(Math.random() * 8) + 1;
-    const candidate = Math.max(1, Math.min(100, correct + (Math.random() > 0.5 ? jitter : -jitter)));
-    if (candidate !== correct) candidates.add(candidate);
+    candidates.add(Math.max(1, Math.min(100, correct + (Math.random() > 0.5 ? jitter : -jitter))));
+    candidates.delete(correct);
   }
 
-  const options = [correct, ...Array.from(candidates).slice(0, 3)];
+  return shuffle([correct, ...Array.from(candidates).slice(0, 3)]);
+}
+
+function shuffle(arr) {
+  const options = [...arr];
   for (let i = options.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [options[i], options[j]] = [options[j], options[i]];
@@ -283,7 +289,6 @@ function renderChoiceButtons() {
     btn.type = "button";
     btn.className = "choice-btn";
     btn.textContent = String(option);
-    btn.disabled = false;
     btn.addEventListener("click", () => checkAnswer(option));
     ui.choiceRow.appendChild(btn);
   });
@@ -297,6 +302,7 @@ function newQuestion() {
     state.a = randFactor();
     state.b = randFactor();
   }
+
   state.locked = false;
   ui.question.textContent = state.mode === "addition" ? `${state.a} + ${state.b} = ?` : `${state.a} × ${state.b} = ?`;
   ui.answer.value = "";
@@ -306,11 +312,8 @@ function newQuestion() {
   ui.next.disabled = true;
 
   applyModeUI();
-  if (state.mode !== "input") {
-    renderChoiceButtons();
-  } else {
-    ui.answer.focus();
-  }
+  if (state.mode !== "input") renderChoiceButtons();
+  else ui.answer.focus();
 }
 
 function endRound() {
@@ -319,6 +322,7 @@ function endRound() {
   const accuracy = Math.round((state.score / TOTAL_QUESTIONS) * 100);
   const durationSeconds = Math.round((Date.now() - state.roundStartedAt) / 1000);
   const history = loadHistory();
+
   history.unshift({
     date: new Date().toLocaleString(currentLocale()),
     score: state.score,
@@ -357,9 +361,8 @@ function checkAnswer(choiceValue) {
     ui.feedback.className = "ok";
   } else {
     state.streak = 0;
-    const questionText = state.mode === "addition" ? `${state.a}+${state.b}` : `${state.a}×${state.b}`;
     const operator = state.mode === "addition" ? "+" : "×";
-    state.misses.push(questionText);
+    state.misses.push(`${state.a}${operator}${state.b}`);
     ui.feedback.textContent = `${t("niceTry")} ${state.a} ${operator} ${state.b} = ${expected}`;
     ui.feedback.className = "bad";
   }
@@ -372,10 +375,7 @@ function checkAnswer(choiceValue) {
 }
 
 function nextStep() {
-  if (state.currentQuestion >= TOTAL_QUESTIONS) {
-    endRound();
-    return;
-  }
+  if (state.currentQuestion >= TOTAL_QUESTIONS) return endRound();
   state.currentQuestion += 1;
   renderStats();
   newQuestion();
@@ -423,6 +423,24 @@ function resetGame() {
   newQuestion();
 }
 
+function openGame(mode) {
+  state.mode = mode;
+  localStorage.setItem(MODE_KEY, state.mode);
+  ui.menuPage.hidden = true;
+  ui.gamePage.hidden = false;
+  resetGame();
+}
+
+function openMenu() {
+  ui.gamePage.hidden = true;
+  ui.menuPage.hidden = false;
+  updateModeButtons();
+}
+
+ui.modeInput.addEventListener("click", () => openGame("input"));
+ui.modeChoice.addEventListener("click", () => openGame("choice"));
+ui.modeAddition.addEventListener("click", () => openGame("addition"));
+ui.menuButton.addEventListener("click", openMenu);
 ui.submit.addEventListener("click", () => checkAnswer());
 ui.next.addEventListener("click", nextStep);
 ui.newGame.addEventListener("click", resetGame);
@@ -430,22 +448,14 @@ ui.languageSelect.addEventListener("change", (event) => {
   state.language = event.target.value;
   localStorage.setItem(LANGUAGE_KEY, state.language);
   applyTranslations();
-});
-ui.modeSelect.addEventListener("change", (event) => {
-  state.mode = event.target.value;
-  localStorage.setItem(MODE_KEY, state.mode);
-  resetGame();
-  applyTranslations();
+  updateModeButtons();
 });
 ui.answer.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !ui.submit.disabled && state.mode === "input") {
-    checkAnswer();
-  }
+  if (event.key === "Enter" && !ui.submit.disabled && state.mode === "input") checkAnswer();
 });
 
 if (!MESSAGES[state.language]) state.language = "de";
 if (!["input", "choice", "addition"].includes(state.mode)) state.mode = "choice";
 ui.languageSelect.value = state.language;
-ui.modeSelect.value = state.mode;
 applyTranslations();
-resetGame();
+openMenu();

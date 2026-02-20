@@ -9,9 +9,7 @@
   --muted: #64748b;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -27,6 +25,9 @@ body {
   margin: 0 auto;
   min-height: 100svh;
   padding: calc(env(safe-area-inset-top, 0px) + 0.9rem) 0.9rem calc(env(safe-area-inset-bottom, 0px) + 1rem);
+}
+
+.page {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -35,46 +36,25 @@ body {
 .app-header,
 .stats,
 .question-card,
-.history {
+.history,
+.menu-card {
   background: var(--card);
   border-radius: 18px;
   border: 1px solid #d7e7ff;
   box-shadow: 0 10px 20px rgba(36, 53, 90, 0.08);
-}
-
-.app-header,
-.question-card,
-.history,
-.stats {
   padding: 0.9rem;
 }
 
-h1,
-h2,
-h3 {
-  margin: 0;
-}
+h1,h2,h3 { margin: 0; }
 
-#title {
-  font-size: 1.25rem;
-}
+#title,#game-title { font-size: 1.25rem; }
+#subtitle,#game-subtitle { margin-top: 0.4rem; color: var(--muted); font-size: 0.95rem; }
 
-#subtitle {
-  margin-top: 0.4rem;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.header-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
-.pickers {
+.game-header {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.5rem;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
 }
 
 .lang-picker {
@@ -83,6 +63,25 @@ h3 {
   gap: 0.2rem;
   font-size: 0.88rem;
   font-weight: 700;
+}
+
+.mode-buttons {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.mode-btn {
+  text-align: left;
+  background: #edf2ff;
+  color: var(--text);
+  border: 2px solid #d2dfff;
+}
+
+.mode-btn.active {
+  background: #2f6fed;
+  color: white;
+  border-color: #2f6fed;
 }
 
 .stats {
@@ -100,28 +99,11 @@ h3 {
   font-weight: 700;
 }
 
-.question-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
+.question-card { display: flex; flex-direction: column; gap: 0.75rem; }
+#question { text-align: center; font-size: 1.55rem; }
 
-#question {
-  text-align: center;
-  font-size: 1.55rem;
-}
-
-.answer-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.55rem;
-}
-
-.choice-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
-}
+.answer-row { display: grid; grid-template-columns: 1fr auto; gap: 0.55rem; }
+.choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
 
 .choice-btn {
   background: #e8f0ff;
@@ -131,9 +113,7 @@ h3 {
   min-height: 48px;
 }
 
-input,
-button,
-select {
+input,button,select {
   font: inherit;
   border-radius: 12px;
   border: 1px solid #cbd5e1;
@@ -141,9 +121,7 @@ select {
   min-height: 46px;
 }
 
-input {
-  width: 100%;
-}
+input { width: 100%; }
 
 button {
   background: var(--primary);
@@ -153,9 +131,13 @@ button {
   font-weight: 700;
 }
 
-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.ghost-btn {
+  background: #eef2ff;
+  color: #1f2937;
+  border: 1px solid #cbd5e1;
+  min-height: 40px;
 }
 
 .actions {
@@ -169,33 +151,11 @@ button:disabled {
   gap: 0.5rem;
 }
 
-#new-game {
-  background: var(--accent);
-  color: #1f2937;
-}
-
-#feedback {
-  min-height: 1.3rem;
-  font-weight: 700;
-}
-
-#feedback.ok {
-  color: var(--success);
-}
-
-#feedback.bad {
-  color: var(--error);
-}
-
-.history {
-  margin-bottom: 0.35rem;
-}
-
-#history-list {
-  margin: 0.4rem 0 0;
-  padding-left: 1rem;
-  font-size: 0.9rem;
-}
+#new-game { background: var(--accent); color: #1f2937; }
+#feedback { min-height: 1.3rem; font-weight: 700; }
+#feedback.ok { color: var(--success); }
+#feedback.bad { color: var(--error); }
+#history-list { margin: 0.4rem 0 0; padding-left: 1rem; font-size: 0.9rem; }
 
 @media (min-width: 640px) {
   .app {
@@ -207,11 +167,5 @@ button:disabled {
     box-shadow: 0 16px 40px rgba(25, 50, 90, 0.12);
   }
 
-  .pickers {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  #title {
-    font-size: 1.4rem;
-  }
+  #title,#game-title { font-size: 1.4rem; }
 }
